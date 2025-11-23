@@ -37,3 +37,5 @@ CONFIG_FILES='./configs/exampleConfig.json,./configs/anotherExample.json'
 If you provide no value for CONFIG_FILES all configs from configs folder will be executed.
 
 For more information what this framework has to offer and what is the approach explore it on your own. First, by running the example with ./k6 run main.js -e CONFIG_FILES='./configs/exampleConfig.json' -e URL='https://test-api.k6.io'. Enjoy! :D
+
+more details: https://github.com/grafana/awesome-k6
