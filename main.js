@@ -1,6 +1,6 @@
 export * from './scripts/index.js';
-import { Config } from './objects/config.js';
-import { Data } from './objects/data.js';
+import { Config } from '../k6_framework2/objects/config.js';
+import { Data } from '../k6_framework2/objects/data.js';
 import exec from 'k6/x/exec';
 
 if (__ENV.CONFIG_FILES) {
