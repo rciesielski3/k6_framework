@@ -1,37 +1,29 @@
-import { Requests } from './requests.js';
 import exec from 'k6/execution';
 
-export class Data extends Requests {
-  constructor(url, data) {
-    super(url);
+export class Data {
+  constructor(data) {
     this.data = data;
-    this.user = 'data';
   }
 
   getData() {
+    for (const name of this.data) {
+      if (name !== 'pizza') {
+        exec.test.abort(`Unknown data set '${name}'`);
+      }
+    }
     return {
-      example: this.data.includes('example') ? this._getExamples() : {},
-      other: this.data.includes('other') ? this._getOthers() : {},
+      pizza: this.data.includes('pizza') ? this._getPizzaRestrictions() : {},
     };
   }
 
-  _getExamples() {
-    const availableExamples = { username: 'user', password: 'test123!' };
-
-    if (availableExamples.length === 0) {
-      exec.test.abort('No examples are available in the dataset');
-    }
-
-    return availableExamples;
-  }
-
-  _getOthers() {
-    const availableOthers = [4, 5];
-
-    if (availableOthers.length === 0) {
-      exec.test.abort('No others are available in the dataset');
-    }
-
-    return availableOthers;
+  _getPizzaRestrictions() {
+    return {
+      maxCaloriesPerSlice: 1000,
+      mustBeVegetarian: false,
+      excludedIngredients: [],
+      excludedTools: [],
+      maxNumberOfToppings: 5,
+      minNumberOfToppings: 2,
+    };
   }
 }

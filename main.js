@@ -1,16 +1,42 @@
-export * from './scripts/index.js';
-import { Config } from '../k6_framework2/objects/config.js';
-import { Data } from '../k6_framework2/objects/data.js';
-import exec from 'k6/x/exec';
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
+import { Config } from './objects/config.js';
+import { Data } from './objects/data.js';
+import * as scripts from './scripts/index.js';
 
-if (__ENV.CONFIG_FILES) {
-  exec.command('./common/config_setup.sh', __ENV.CONFIG_FILES.split(','));
-} else {
-  exec.command('./common/config_setup.sh');
+export * from './scripts/index.js';
+
+// Configuration comes from environment variables (pass with `k6 run -e NAME=value`):
+//   BASE_URL      target under test (default: the QuickPizza demo)
+//   CONFIG_FILES  comma separated config files, relative to this file
+//                 (default: configs/smokeConfig.json)
+//   SCENARIO      optional, overrides scenarioName of every selected test
+const BASE_URL = __ENV.BASE_URL || 'https://quickpizza.grafana.com';
+const CONFIG_FILES = (__ENV.CONFIG_FILES || 'configs/smokeConfig.json')
+  .split(',')
+  .map((file) => file.trim())
+  .filter((file) => file !== '');
+
+function loadConfigFile(file) {
+  let content;
+  try {
+    content = open(file);
+  } catch (e) {
+    throw new Error(
+      `Cannot read config file '${file}' (CONFIG_FILES paths are relative to main.js): ${e.message}`,
+    );
+  }
+  try {
+    return JSON.parse(content);
+  } catch (e) {
+    throw new Error(`Config file '${file}' is not valid JSON: ${e.message}`);
+  }
 }
 
-const configFiles = JSON.parse(open('./load_config.json'));
-let config = new Config(configFiles);
+const config = new Config(
+  CONFIG_FILES.map(loadConfigFile),
+  Object.keys(scripts),
+  __ENV.SCENARIO,
+);
 const [scenarios, thresholds, data] = config.getConfig();
 
 export const options = {
@@ -19,18 +45,13 @@ export const options = {
 };
 
 export function setup() {
-  console.info('Executing setup');
-
-  let setupData = new Data(__ENV.URL, data);
-
-  return setupData.getData();
+  console.info(`Executing setup, target: ${BASE_URL}`);
+  return { baseUrl: BASE_URL, ...new Data(data).getData() };
 }
 
-export default function () {
-  console.warn('default main function');
-}
-
-export function teardown() {
-  console.info('Executing teardown');
-  //TEARDOWN ACTIONS
+export function handleSummary(summary) {
+  return {
+    stdout: textSummary(summary, { indent: ' ', enableColors: false }),
+    'summary.json': JSON.stringify(summary, null, 2),
+  };
 }

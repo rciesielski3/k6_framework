@@ -1,11 +1,12 @@
 {
   "name": "k6_framework",
   "version": "0.0.2",
-  "description": "Template repostitory",
+  "description": "k6 test framework: env-var configured scenarios, thresholds and a QuickPizza smoke test",
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "test": "k6 run main.js -e CONFIG_FILES=configs/exampleConfig.json -e URL=https://test-api.k6.io",
+    "test": "k6 run main.js",
+    "smoke": "k6 run main.js -e BASE_URL=https://quickpizza.grafana.com",
     "eslint": "npx eslint .",
     "eslint:fix": "npx eslint . --fix"
   },
