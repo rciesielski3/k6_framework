@@ -1,3 +1,15 @@
+// Safe against a shared public demo: 2 VUs, 2 iterations each (~24 requests,
+// well under 30s).
+export const smoke = {
+  executor: 'per-vu-iterations',
+  vus: 2,
+  iterations: 2,
+  maxDuration: '30s',
+};
+
+// !!! Everything below is for YOUR OWN environment only. Never point these
+// !!! at the QuickPizza demo or any host you do not own or have permission for.
+
 export const stages30m10vu = {
   executor: 'ramping-vus',
   startVUs: 2,

@@ -1,0 +1,49 @@
+name: k6 smoke
+
+# Manual runs only: Actions tab -> "k6 smoke" -> Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Target URL (use only the QuickPizza demo or your own environment)'
+        required: false
+        default: 'https://quickpizza.grafana.com'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: k6-smoke
+  cancel-in-progress: false
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run eslint
+
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: grafana/setup-k6-action@v1
+      - uses: grafana/run-k6-action@v1
+        with:
+          path: main.js
+          flags: -e BASE_URL=${{ inputs.base_url }}
+          cloud-comment-on-pr: false
+          disable-analytics: true
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: k6-summary
+          path: summary.json
+          if-no-files-found: warn

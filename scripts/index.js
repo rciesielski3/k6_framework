@@ -1,1 +1,1 @@
-export { exampleOne as exampleScriptOne } from './scriptFolderOne/exampleScript.js';
+export { quickpizzaSmoke } from './quickpizza/smokeScript.js';
